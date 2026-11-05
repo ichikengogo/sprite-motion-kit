@@ -10,6 +10,8 @@ from motion import render,validate,pose
 PHASES=(0,.25,.5,.75)
 # Full RGBA-frame hashes for the synthetic legacy registered-width fixture.
 EXPECTED=['4cb3a9741c3498bc57078a7db7f4c0530ae250f23caef7cf59e05a926b7d39b9','954c25554b6ce21e2f1c9947f43a5e80eccadb249d54e863bf000a1c1a409508','63918c9dadbdf1cab4dfba1661484d56bfbe76e8d94f88d2f1bdfdf4d3d2a76e','6c3a236dc8f819dd47df164d707945b0d2d49574a346a2f6e39610c57b4decc4']
+# The pre-fix renderer, captured independently on the Haswell OpenBLAS kernel.
+PRE_FIX_HASWELL=['2769e03beecfeca01347fbaa19a8ad1b799d5e0784206c61c1674c5134a940b8','bdc308be6af12b0657ed319beceb4ad0926a4c6d9aaa302fc13f2bed137955d1','e3bc48aae2836ff463bb69072e65b4527358b77095f6a831b11cf5054fc52407','563ce9677b954f3e7fc4e07d8220c29255d2eb7616f7a84e674b16f80b09d4a5']
 
 class SourceHemMappingTests(unittest.TestCase):
  def fixture(self):
@@ -36,13 +38,30 @@ class SourceHemMappingTests(unittest.TestCase):
   values=np.array([-1,69.9999998,70-1e-10,70+1e-10,70.0000002,256],dtype=float)/255
   np.testing.assert_array_equal(_rgba8(values),[0,69,70,70,70,255])
  @unittest.skipUnless(sys.platform.startswith('linux') and platform.machine().lower() in ('x86_64','amd64'),'OpenBLAS x86 dispatch check')
- def test_legacy_raster_with_haswell_blas(self):
+ def test_legacy_raster_with_alternate_blas_kernels(self):
   # OpenBLAS selects its CPU kernel when the library is loaded.
   script='''import hashlib,json\nfrom test_source_hem_mapping import SourceHemMappingTests,PHASES\nfrom motion import render\nr,l=SourceHemMappingTests().fixture()\nprint(json.dumps([hashlib.sha256(render(r,l,"walk",p)[0].tobytes()).hexdigest() for p in PHASES]))'''
-  env=os.environ.copy(); env['OPENBLAS_CORETYPE']='Haswell'
+  for core in ('Haswell','Sandybridge'):
+   with self.subTest(core=core):
+    env=os.environ.copy(); env['OPENBLAS_CORETYPE']=core
+    env['PYTHONPATH']=os.pathsep.join(filter(None,[str(Path(__file__).resolve().parent),env.get('PYTHONPATH','')]))
+    result=subprocess.run([sys.executable,'-c',script],env=env,capture_output=True,text=True,check=True,timeout=60)
+    self.assertEqual(json.loads(result.stdout),EXPECTED)
+ @unittest.skipUnless(sys.platform.startswith('linux') and platform.machine().lower() in ('x86_64','amd64'),'OpenBLAS x86 reference')
+ def test_preserves_pre_fix_raster_silhouette_and_color(self):
+  # Reproduce the original byte conversion; its independently captured hashes
+  # guard against a shared change to the renderer used on both sides below.
+  script='''import hashlib,json\nimport numpy as np\nfrom unittest.mock import patch\nfrom test_source_hem_mapping import SourceHemMappingTests,PHASES\nfrom motion import render\nr,l=SourceHemMappingTests().fixture()\nresults=[]\nfor phase in PHASES:\n with patch("joint_mesh._rgba8",side_effect=lambda rgba:np.uint8(np.clip(rgba*255,0,255))):\n  old=np.asarray(render(r,l,"walk",phase)[0])\n new=np.asarray(render(r,l,"walk",phase)[0])\n diff=np.abs(old.astype(np.int16)-new.astype(np.int16))\n results.append({"old_hash":hashlib.sha256(old.tobytes()).hexdigest(),"max_delta":int(diff.max()),"changed_pixels":int(np.any(diff,axis=2).sum()),"mask_changed":int(np.count_nonzero((old[:,:,3]>0)!=(new[:,:,3]>0))),"alpha_delta":int(diff[:,:,3].max())})\nprint(json.dumps(results))'''
+  env=os.environ.copy();env['OPENBLAS_CORETYPE']='Haswell'
   env['PYTHONPATH']=os.pathsep.join(filter(None,[str(Path(__file__).resolve().parent),env.get('PYTHONPATH','')]))
   result=subprocess.run([sys.executable,'-c',script],env=env,capture_output=True,text=True,check=True,timeout=60)
-  self.assertEqual(json.loads(result.stdout),EXPECTED)
+  frames=json.loads(result.stdout);self.assertEqual(len(frames),len(PRE_FIX_HASWELL))
+  for expected,frame in zip(PRE_FIX_HASWELL,frames):
+   self.assertEqual(frame['old_hash'],expected)
+   self.assertEqual(frame['mask_changed'],0)
+   self.assertLessEqual(frame['alpha_delta'],1)
+   self.assertLessEqual(frame['max_delta'],4)
+   self.assertLessEqual(frame['changed_pixels'],1500)
  def test_optin_no_pose_material_or_dash_mutation(self):
   r,l=self.fixture();old=copy.deepcopy(r);saved={n:im.tobytes() for n,im in l.items()}
   r['walkGarment']['sourceHemMode']='preserve-x';validate(r);confirmed=copy.deepcopy(r)
