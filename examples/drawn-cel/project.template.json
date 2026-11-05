@@ -1,0 +1,211 @@
+{
+  "schema": "drawn-cel-loop/1",
+  "canvas": [
+    512,
+    512
+  ],
+  "frames": 8,
+  "durationSeconds": 1,
+  "durationsMs": [
+    120,
+    130,
+    120,
+    130,
+    120,
+    130,
+    120,
+    130
+  ],
+  "identitySources": [
+    "sources/original.png"
+  ],
+  "upperCel": "sources/shared-upper.png",
+  "upperTranslationX": 0,
+  "upperAnchorY": 0,
+  "sourcePins": {},
+  "connectionRestorePolygons": {},
+  "registration": [
+    {
+      "source": "sources/cel-00.png",
+      "sourceWaist": [
+        0,
+        0
+      ],
+      "uniformLowerScale": 1.0,
+      "translation": [
+        0,
+        0
+      ],
+      "targetWaist": [
+        0,
+        0
+      ],
+      "clipRects": []
+    },
+    {
+      "source": "sources/cel-01.png",
+      "sourceWaist": [
+        0,
+        0
+      ],
+      "uniformLowerScale": 1.0,
+      "translation": [
+        0,
+        0
+      ],
+      "targetWaist": [
+        0,
+        0
+      ],
+      "clipRects": []
+    },
+    {
+      "source": "sources/cel-02.png",
+      "sourceWaist": [
+        0,
+        0
+      ],
+      "uniformLowerScale": 1.0,
+      "translation": [
+        0,
+        0
+      ],
+      "targetWaist": [
+        0,
+        0
+      ],
+      "clipRects": []
+    },
+    {
+      "source": "sources/cel-03.png",
+      "sourceWaist": [
+        0,
+        0
+      ],
+      "uniformLowerScale": 1.0,
+      "translation": [
+        0,
+        0
+      ],
+      "targetWaist": [
+        0,
+        0
+      ],
+      "clipRects": []
+    },
+    {
+      "source": "sources/cel-04.png",
+      "sourceWaist": [
+        0,
+        0
+      ],
+      "uniformLowerScale": 1.0,
+      "translation": [
+        0,
+        0
+      ],
+      "targetWaist": [
+        0,
+        0
+      ],
+      "clipRects": []
+    },
+    {
+      "source": "sources/cel-05.png",
+      "sourceWaist": [
+        0,
+        0
+      ],
+      "uniformLowerScale": 1.0,
+      "translation": [
+        0,
+        0
+      ],
+      "targetWaist": [
+        0,
+        0
+      ],
+      "clipRects": []
+    },
+    {
+      "source": "sources/cel-06.png",
+      "sourceWaist": [
+        0,
+        0
+      ],
+      "uniformLowerScale": 1.0,
+      "translation": [
+        0,
+        0
+      ],
+      "targetWaist": [
+        0,
+        0
+      ],
+      "clipRects": []
+    },
+    {
+      "source": "sources/cel-07.png",
+      "sourceWaist": [
+        0,
+        0
+      ],
+      "uniformLowerScale": 1.0,
+      "translation": [
+        0,
+        0
+      ],
+      "targetWaist": [
+        0,
+        0
+      ],
+      "clipRects": []
+    }
+  ],
+  "phaseMetadata": [
+    {
+      "phase": "contact",
+      "supportOwner": "near",
+      "swingOwner": "far"
+    },
+    {
+      "phase": "down",
+      "supportOwner": "near",
+      "swingOwner": "far"
+    },
+    {
+      "phase": "passing",
+      "supportOwner": "near",
+      "swingOwner": "far"
+    },
+    {
+      "phase": "up",
+      "supportOwner": "near",
+      "swingOwner": "far"
+    },
+    {
+      "phase": "contact",
+      "supportOwner": "far",
+      "swingOwner": "near"
+    },
+    {
+      "phase": "down",
+      "supportOwner": "far",
+      "swingOwner": "near"
+    },
+    {
+      "phase": "passing",
+      "supportOwner": "far",
+      "swingOwner": "near"
+    },
+    {
+      "phase": "up",
+      "supportOwner": "far",
+      "swingOwner": "near"
+    }
+  ],
+  "status": "INCOMPLETE TEMPLATE: replace dimensions, source ownership, registration and actual role observations; no art supplied",
+  "limitations": [
+    "No automatic raster generation or interpolation. Source artwork edits require an authorized drawing or image-editing workflow. Phase labels are declarations, not visual proof."
+  ]
+}

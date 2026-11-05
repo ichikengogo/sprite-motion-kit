@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+output/
+work/
+build/
+dist/
+private-inputs/
+*.env
+.env*
+*.log
+*-project.json
+.DS_Store
