@@ -35,11 +35,11 @@ class SourceHemMappingTests(unittest.TestCase):
  def test_quantization_stabilizes_only_subchannel_boundary_noise(self):
   values=np.array([-1,69.9999998,70-1e-10,70+1e-10,70.0000002,256],dtype=float)/255
   np.testing.assert_array_equal(_rgba8(values),[0,69,70,70,70,255])
- @unittest.skipUnless(sys.platform.startswith('linux') and platform.machine().lower() in ('x86_64','amd64'),'NumPy x86 SIMD dispatch check')
- def test_legacy_raster_without_avx512(self):
-  # A fresh process is required because NumPy selects SIMD paths on import.
+ @unittest.skipUnless(sys.platform.startswith('linux') and platform.machine().lower() in ('x86_64','amd64'),'OpenBLAS x86 dispatch check')
+ def test_legacy_raster_with_haswell_blas(self):
+  # OpenBLAS selects its CPU kernel when the library is loaded.
   script='''import hashlib,json\nfrom test_source_hem_mapping import SourceHemMappingTests,PHASES\nfrom motion import render\nr,l=SourceHemMappingTests().fixture()\nprint(json.dumps([hashlib.sha256(render(r,l,"walk",p)[0].tobytes()).hexdigest() for p in PHASES]))'''
-  env=os.environ.copy(); env['NPY_DISABLE_CPU_FEATURES']=','.join(filter(None,[env.get('NPY_DISABLE_CPU_FEATURES',''),'AVX512F']))
+  env=os.environ.copy(); env['OPENBLAS_CORETYPE']='Haswell'
   env['PYTHONPATH']=os.pathsep.join(filter(None,[str(Path(__file__).resolve().parent),env.get('PYTHONPATH','')]))
   result=subprocess.run([sys.executable,'-c',script],env=env,capture_output=True,text=True,check=True,timeout=60)
   self.assertEqual(json.loads(result.stdout),EXPECTED)
