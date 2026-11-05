@@ -7,6 +7,7 @@ Dependencies are installed separately, not vendored or redistributed in this sou
 | Python 3.10+ | Runtime and standard library | PSF | 3.12 |
 | Pillow | Image decoding, drawing, compositing, transforms, PNG/GIF | MIT-CMU (package metadata) | 12.3.0 |
 | NumPy | Mesh rasterization and diagnostics | BSD-3-Clause | 2.3.5 |
+| threadpoolctl | Optional test-only BLAS inspection; installed by CI | BSD-3-Clause | See CI |
 | Node.js 18+ | Optional JavaScript unit/syntax tests only | Node.js distribution notices | See CI |
 | Browser platform APIs | Local editor | Browser distribution notices | No JS library bundled |
 

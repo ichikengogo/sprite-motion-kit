@@ -1,7 +1,7 @@
-import copy,hashlib,json,os,platform,subprocess,sys,unittest
-from pathlib import Path
+import copy,hashlib,unittest
 from unittest.mock import patch
 import numpy as np
+from blas_capabilities import run_with_kernel
 import test_garment
 from garment import panel_hem_x
 from joint_mesh import _rgba8
@@ -37,25 +37,17 @@ class SourceHemMappingTests(unittest.TestCase):
  def test_quantization_stabilizes_only_subchannel_boundary_noise(self):
   values=np.array([-1,69.9999998,70-1e-10,70+1e-10,70.0000002,256],dtype=float)/255
   np.testing.assert_array_equal(_rgba8(values),[0,69,70,70,70,255])
- @unittest.skipUnless(sys.platform.startswith('linux') and platform.machine().lower() in ('x86_64','amd64'),'OpenBLAS x86 dispatch check')
  def test_legacy_raster_with_alternate_blas_kernels(self):
   # OpenBLAS selects its CPU kernel when the library is loaded.
-  script='''import hashlib,json\nfrom test_source_hem_mapping import SourceHemMappingTests,PHASES\nfrom motion import render\nr,l=SourceHemMappingTests().fixture()\nprint(json.dumps([hashlib.sha256(render(r,l,"walk",p)[0].tobytes()).hexdigest() for p in PHASES]))'''
+  script='''import hashlib\nfrom test_source_hem_mapping import SourceHemMappingTests,PHASES\nfrom motion import render\nr,l=SourceHemMappingTests().fixture()\npayload=[hashlib.sha256(render(r,l,"walk",p)[0].tobytes()).hexdigest() for p in PHASES]'''
   for core in ('Haswell','Sandybridge'):
    with self.subTest(core=core):
-    env=os.environ.copy(); env['OPENBLAS_CORETYPE']=core
-    env['PYTHONPATH']=os.pathsep.join(filter(None,[str(Path(__file__).resolve().parent),env.get('PYTHONPATH','')]))
-    result=subprocess.run([sys.executable,'-c',script],env=env,capture_output=True,text=True,check=True,timeout=60)
-    self.assertEqual(json.loads(result.stdout),EXPECTED)
- @unittest.skipUnless(sys.platform.startswith('linux') and platform.machine().lower() in ('x86_64','amd64'),'OpenBLAS x86 reference')
+    self.assertEqual(run_with_kernel(core,script),EXPECTED)
  def test_preserves_pre_fix_raster_silhouette_and_color(self):
   # Reproduce the original byte conversion; its independently captured hashes
   # guard against a shared change to the renderer used on both sides below.
-  script='''import hashlib,json\nimport numpy as np\nfrom unittest.mock import patch\nfrom test_source_hem_mapping import SourceHemMappingTests,PHASES\nfrom motion import render\nr,l=SourceHemMappingTests().fixture()\nresults=[]\nfor phase in PHASES:\n with patch("joint_mesh._rgba8",side_effect=lambda rgba:np.uint8(np.clip(rgba*255,0,255))):\n  old=np.asarray(render(r,l,"walk",phase)[0])\n new=np.asarray(render(r,l,"walk",phase)[0])\n diff=np.abs(old.astype(np.int16)-new.astype(np.int16))\n results.append({"old_hash":hashlib.sha256(old.tobytes()).hexdigest(),"max_delta":int(diff.max()),"changed_pixels":int(np.any(diff,axis=2).sum()),"mask_changed":int(np.count_nonzero((old[:,:,3]>0)!=(new[:,:,3]>0))),"alpha_delta":int(diff[:,:,3].max())})\nprint(json.dumps(results))'''
-  env=os.environ.copy();env['OPENBLAS_CORETYPE']='Haswell'
-  env['PYTHONPATH']=os.pathsep.join(filter(None,[str(Path(__file__).resolve().parent),env.get('PYTHONPATH','')]))
-  result=subprocess.run([sys.executable,'-c',script],env=env,capture_output=True,text=True,check=True,timeout=60)
-  frames=json.loads(result.stdout);self.assertEqual(len(frames),len(PRE_FIX_HASWELL))
+  script='''import hashlib\nimport numpy as np\nfrom unittest.mock import patch\nfrom test_source_hem_mapping import SourceHemMappingTests,PHASES\nfrom motion import render\nr,l=SourceHemMappingTests().fixture()\npayload=[]\nfor phase in PHASES:\n with patch("joint_mesh._rgba8",side_effect=lambda rgba:np.uint8(np.clip(rgba*255,0,255))):\n  old=np.asarray(render(r,l,"walk",phase)[0])\n new=np.asarray(render(r,l,"walk",phase)[0])\n diff=np.abs(old.astype(np.int16)-new.astype(np.int16))\n payload.append({"old_hash":hashlib.sha256(old.tobytes()).hexdigest(),"max_delta":int(diff.max()),"changed_pixels":int(np.any(diff,axis=2).sum()),"mask_changed":int(np.count_nonzero((old[:,:,3]>0)!=(new[:,:,3]>0))),"alpha_delta":int(diff[:,:,3].max())})'''
+  frames=run_with_kernel('Haswell',script);self.assertEqual(len(frames),len(PRE_FIX_HASWELL))
   for expected,frame in zip(PRE_FIX_HASWELL,frames):
    self.assertEqual(frame['old_hash'],expected)
    self.assertEqual(frame['mask_changed'],0)
