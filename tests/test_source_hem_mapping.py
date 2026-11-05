@@ -1,7 +1,15 @@
-import copy,hashlib,unittest
+import copy,hashlib,json,os,platform,subprocess,sys,unittest
+from pathlib import Path
+from unittest.mock import patch
+import numpy as np
 import test_garment
 from garment import panel_hem_x
+from joint_mesh import _rgba8
 from motion import render,validate,pose
+
+PHASES=(0,.25,.5,.75)
+# Full RGBA-frame hashes for the synthetic legacy registered-width fixture.
+EXPECTED=['4cb3a9741c3498bc57078a7db7f4c0530ae250f23caef7cf59e05a926b7d39b9','954c25554b6ce21e2f1c9947f43a5e80eccadb249d54e863bf000a1c1a409508','63918c9dadbdf1cab4dfba1661484d56bfbe76e8d94f88d2f1bdfdf4d3d2a76e','6c3a236dc8f819dd47df164d707945b0d2d49574a346a2f6e39610c57b4decc4']
 
 class SourceHemMappingTests(unittest.TestCase):
  def fixture(self):
@@ -15,11 +23,26 @@ class SourceHemMappingTests(unittest.TestCase):
   self.assertEqual(panel_hem_x({},panel,150),164)
   self.assertEqual(panel_hem_x({},panel,191),187)
   self.assertNotEqual(panel_hem_x({},panel,164),164)
- def test_legacy_raster_bytes_unchanged(self):
-  # Captured from actual renderer immediately before adding the option.
-  expected=['496a4f4b762e7780aeaba9489fab05222e11607cb62ae329339602fe7ac91f2f','72c56fc6c741f6dbf69870ee48aadebef3513e1a2d05e01f29ffde45222e2faa','0329b8aa5c6db16f767f91c224205b841b0c836c4a61c00c7679f3d3f6c08db0','9c4055906b3106d614a789f110a17af469d3faf1578f15b8780a080b27ac2940']
+ def test_legacy_raster_golden_frames(self):
+  # Hash every byte; no per-pixel tolerance or aggregate similarity threshold.
   r,l=self.fixture()
-  for phase,h in zip((0,.25,.5,.75),expected):self.assertEqual(hashlib.sha256(render(r,l,'walk',phase)[0].tobytes()).hexdigest(),h)
+  for phase,h in zip(PHASES,EXPECTED):self.assertEqual(hashlib.sha256(render(r,l,'walk',phase)[0].tobytes()).hexdigest(),h)
+ def test_legacy_digest_detects_wrong_hem_mapping(self):
+  r,l=self.fixture()
+  with patch('garment.panel_hem_x',side_effect=lambda config,panel,x:x):
+   actual=hashlib.sha256(render(r,l,'walk',0)[0].tobytes()).hexdigest()
+  self.assertNotEqual(actual,EXPECTED[0])
+ def test_quantization_stabilizes_only_subchannel_boundary_noise(self):
+  values=np.array([-1,69.9999998,70-1e-10,70+1e-10,70.0000002,256],dtype=float)/255
+  np.testing.assert_array_equal(_rgba8(values),[0,69,70,70,70,255])
+ @unittest.skipUnless(sys.platform.startswith('linux') and platform.machine().lower() in ('x86_64','amd64'),'NumPy x86 SIMD dispatch check')
+ def test_legacy_raster_without_avx512(self):
+  # A fresh process is required because NumPy selects SIMD paths on import.
+  script='''import hashlib,json\nfrom test_source_hem_mapping import SourceHemMappingTests,PHASES\nfrom motion import render\nr,l=SourceHemMappingTests().fixture()\nprint(json.dumps([hashlib.sha256(render(r,l,"walk",p)[0].tobytes()).hexdigest() for p in PHASES]))'''
+  env=os.environ.copy(); env['NPY_DISABLE_CPU_FEATURES']=','.join(filter(None,[env.get('NPY_DISABLE_CPU_FEATURES',''),'AVX512F']))
+  env['PYTHONPATH']=os.pathsep.join(filter(None,[str(Path(__file__).resolve().parent),env.get('PYTHONPATH','')]))
+  result=subprocess.run([sys.executable,'-c',script],env=env,capture_output=True,text=True,check=True,timeout=60)
+  self.assertEqual(json.loads(result.stdout),EXPECTED)
  def test_optin_no_pose_material_or_dash_mutation(self):
   r,l=self.fixture();old=copy.deepcopy(r);saved={n:im.tobytes() for n,im in l.items()}
   r['walkGarment']['sourceHemMode']='preserve-x';validate(r);confirmed=copy.deepcopy(r)

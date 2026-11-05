@@ -5,6 +5,12 @@ import math
 import numpy as np
 from PIL import Image
 
+def _rgba8(rgba):
+    """Convert normalized channels to bytes with stable boundary handling."""
+    # SIMD paths can land on opposite sides of an integer by a few ulps.
+    # Round only at sub-channel precision, then retain truncation to bytes.
+    return np.uint8(np.round(np.clip(rgba*255,0,255),7))
+
 def _joint_mapper(rig,transforms,parent,child,radius=10,contour='rotation',ankle_depth=0,cloth_width=None,ankle_offset=0,cuff_normal=None):
     """Map registered source points using the same skinning as raster triangles."""
     a=rig['parts'][parent];b=rig['parts'][child]
@@ -106,7 +112,8 @@ def draw_mapped(source,skin,step=6,diagnostics=None,grid_bounds=None):
           sample=np.zeros((*ix.shape,4))
           for dx,dy,weight in [(0,0,(1-fx)*(1-fy)),(1,0,fx*(1-fy)),(0,1,(1-fx)*fy),(1,1,fx*fy)]:sample+=pixels[np.clip(iy+dy,0,383),np.clip(ix+dx,0,383)]*weight[:,:,None]
           tile=out[ymin:ymax,xmin:xmax];tile[inside]=sample[inside]
-    alpha=out[:,:,3:4];rgb=np.divide(out[:,:,:3],alpha,out=np.zeros_like(out[:,:,:3]),where=alpha>1e-8);return Image.fromarray(np.uint8(np.clip(np.concatenate([rgb,alpha],axis=2)*255,0,255)))
+    alpha=out[:,:,3:4];rgb=np.divide(out[:,:,:3],alpha,out=np.zeros_like(out[:,:,:3]),where=alpha>1e-8)
+    return Image.fromarray(_rgba8(np.concatenate([rgb,alpha],axis=2)))
 
 def draw_joint(rig,layers,transforms,parent,child,radius=10,step=6,diagnostics=None,contour='rotation',ankle_depth=0,cloth_width=None,ankle_offset=0,cuff_normal=None):
     if contour not in ('rotation','centerline'):raise ValueError('Unknown contour mode')
