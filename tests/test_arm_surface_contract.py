@@ -62,5 +62,29 @@ class ArmSurfaceContractTests(unittest.TestCase):
  def test_contract_change_invalidates_intake(self):
   self.review();self.p['views']['front']['armSurfaceSpec']=self.spec(self.arm());self.save()
   with self.assertRaisesRegex(ValueError,'stale'):cw.plan(self.profile)
+ def hand_intent(self):
+  return {'thumbSide':'Describe the body-facing thumb surface from the actual pose, not a fingertip arrow.',
+          'fistDirection':'Describe fist placement relative to wrist and forearm; no universal up direction.',
+          'wristAndFingers':'Inspect coherent curled fingers and one continuous wrist/cuff attachment.',
+          'phaseContext':'Check both swing extremes and occluded phases without claiming hidden pixels were seen.'}
+ def test_independent_hand_intent_propagates_without_semantic_approval(self):
+  a=self.arm();a['handPoseIntent']=self.hand_intent();spec=self.spec(a)
+  self.p['views']['side']['armSurfaceSpec']=spec;self.review()
+  r=next(x for x in cw.plan(self.profile)['requests'] if x['view']=='side')
+  self.assertEqual(r['armSurfaceSpec'],spec);self.assertFalse(r['armSurfaceReview']['automaticSemanticValidation'])
+  x=self.root/'a.png';y=self.root/'b.png';Image.new('RGBA',(30,50),'red').save(x);Image.new('RGBA',(30,50),'blue').save(y)
+  t=cw.plan_transition(self.profile,'side',1,2,x,y,[.5])
+  self.assertEqual(t['requests'][0]['armSurfaceSpec'],spec)
+ def test_incomplete_or_numeric_hand_intent_rejected(self):
+  for invalid in ({},dict(self.hand_intent(),thumbSide=[1,0]),dict(self.hand_intent(),phaseContext='')):
+   a=self.arm();a['handPoseIntent']=invalid;self.p['views']['side']['armSurfaceSpec']=self.spec(a);self.save()
+   with self.assertRaisesRegex(ValueError,'handPoseIntent'):cw.decisions(self.profile)
+ def test_null_hand_intent_is_backward_compatible_unknown(self):
+  a=self.arm();a['handPoseIntent']=None;self.p['views']['side']['armSurfaceSpec']=self.spec(a);self.review()
+  self.assertIsNone(next(x for x in cw.plan(self.profile)['requests'] if x['view']=='side')['armSurfaceSpec']['arms'][0]['handPoseIntent'])
+ def test_hand_intent_change_invalidates_intake(self):
+  a=self.arm();a['handPoseIntent']=self.hand_intent();self.p['views']['side']['armSurfaceSpec']=self.spec(a);self.review()
+  self.p['views']['side']['armSurfaceSpec']['arms'][0]['handPoseIntent']['thumbSide']='Different intended thumb-side surface.';self.save()
+  with self.assertRaisesRegex(ValueError,'stale'):cw.plan(self.profile)
 
 if __name__=='__main__':unittest.main()

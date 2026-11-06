@@ -11,3 +11,5 @@ External artwork remains the responsibility of its owner. Importing an image, wr
 Dependencies are not bundled; their licenses are described in `DEPENDENCIES.md`. This document describes the curated release scope, not a legal opinion or exhaustive originality guarantee.
 
 The authored dash repair helpers and their demonstration also use only parameterized algorithms and newly code-drawn shapes. No production landmark arrays, character identities, generation sheets, accepted media or upload records are included. The local cubic interpolation is an original implementation of the standard shape-preserving Hermite method, not vendored SciPy source.
+
+Pose/hand review contracts preserve general lessons about independent surface, thumb-side, fist-direction and attachment checks. Review fixtures use newly constructed geometric shapes and authored annotations, not production images or measurements. Worksheet validation and geometric diagnostics cannot establish anatomical correctness or prove that a reviewer watched playback.

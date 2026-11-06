@@ -63,6 +63,8 @@ The example uses original geometric shapes. Real artwork still needs authored la
 
 See [production checks](docs/PRODUCTION_CHECKS.md) for detailed lessons and the evidence template. User acceptance, structural checks and independent visual review are separate records. Outputs stay drafts unless a human makes a scoped quality decision.
 
+Use [pose-specific hand and posture review](docs/POSE_REVIEW.md) for separate surface, thumb-side, fist-direction and wrist/finger observations bound to each actual frame. Optional hand-pose intent travels through drawing requests; hash/coverage checks and authored mask/joint diagnostics never certify anatomy or playback.
+
 ## Run checks
 
 ```sh

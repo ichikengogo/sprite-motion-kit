@@ -31,3 +31,5 @@ jobs:
       - run: python layered_motion.py --demo output/layered
       - run: python dash_project.py demo output/dash-example
       - run: python dash_project.py verify output/dash-example/project.json output/dash-example/rendered
+      - run: python pose_review.py --root output/pose-review demo
+      - run: python pose_review.py --root output/pose-review check manifest.json review.json --out check.json

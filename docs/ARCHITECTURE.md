@@ -18,3 +18,4 @@ The editor normalizes user input to a 384px canvas. The authored-cel and layered
 
 - `dash_registration.py`: parameterized monotone body-axis registration, integer shared-layer placement, shaft/hand and row-width geometry; no image inference.
 - `dash_project.py`: source-pinned per-view authored dash registration, PNG/GIF export, diagnostics and byte-exact verification in a clean temporary directory. See `DASH_REPRODUCTION.md` for input constraints and unreviewed temporal status.
+- `pose_review.py`: hash-bound per-frame/physical-arm review coverage plus explicitly annotated geometric diagnostics. It does not infer anatomy, hand surfaces, support roles or review outcomes. See `POSE_REVIEW.md`.

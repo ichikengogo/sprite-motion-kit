@@ -8,6 +8,19 @@ Identify each physical arm and its screen/near-far mapping. Record whether the v
 
 For held hands, preserve the actual contact and wrist orientation. For free arms, preserve the intended shoulder-led swing and natural forearm/wrist relationship. Decide whether the hand surface changes through that swing; do not simply flip one raster hand or force both hands to display palms.
 
+### Review separate requirements separately
+
+A correct palm surface does not establish a correct thumb side, and a correct thumb side does not establish the intended fist direction. For the actual forward-swing pose and then every other actual cel, inspect independently:
+
+1. **Visible surface:** palm, dorsal, edge, mixed or genuinely hidden. Finger pads, knuckles and thumb overlap matter; color/alpha does not recognize them.
+2. **Thumb-side facing:** which side or surface faces the body in this view. Do not narrow a request for a body-facing thumb side into a literal fingertip arrow. Preserve a natural closed grip rather than introducing a thumbs-up.
+3. **Fist direction:** the fist mass relative to the wrist, forearm and body. A fist raised above its wrist is different from a forward punching silhouette. A desired upright key pose does not imply freezing the fist to world-up throughout the swing.
+4. **Wrist and fingers:** one coherent forearm–wrist–palm transition, sensible curled fingers and cuff boundary, without an isolated thumb, duplicate finger or broken attachment.
+
+Inspect the actual composited key pose at native size and enlarged **before** replicating a changed hand through the cycle. This is an internal art check, not an extra user permission gate. Then inspect both swing extremes, intermediate poses and partial occlusions. A neutral atlas may look right and rotate to the wrong visible surface in the intended pose. A two-dimensional mirror or rotation cannot reveal a missing palm or redraw wrist anatomy; author the required surface when needed and record it as inferred. Do not claim the hidden portion of an occluded hand was directly inspected.
+
+Use the new `pose_review.py` worksheet for frame/physical-arm coverage and source freshness. It records authored intent and visual assertions; it does not recognize the hand surface. See the companion `docs/POSE_REVIEW.md` for commands and diagnostic limits.
+
 ## 2. Keep independent near/far arm sources
 
 Retain a separate source or explicitly justified ownership region for each physical arm. Do not reuse a complete near arm as the far arm merely because both are similar: shoulder overlap, sleeve lighting, thumb side and visible hand surface can differ. Label anatomical left/right separately from screen-left/right and near/far; keep those identities through every pose.
@@ -71,6 +84,8 @@ No new CLI command is required. Set `views[VIEW].armSurfaceSpec` to `null`/omit 
 This is a character-neutral input pattern, not ready-to-confirm evidence. Replace descriptions from actual observation and add a separate record with a distinct stable ID for the other physical arm. `visibleHandSurface` accepts `palm`, `dorsal`, `edge`, `occluded` or `source-dependent`; choose the observed value, never a universal palm default. `mode` accepts `free`, `held` or `none` and must agree with the resolved per-view/global contact mode. Held mode requires nonempty `contacts`; free/none require `[]`. For absent arms, `arms: []` is permitted with resolved mode `none`. Duplicate physical IDs are invalid.
 
 `plan` and `transition` carry `armSurfaceSpec` and an `armSurfaceReview` record with status `unrecorded` or `specified-not-visually-validated`, requirements and `automaticSemanticValidation: false`. The declared arm count is not fixed; inspect every arm actually present in the source, because a supplied list does not automatically prove complete coverage. All declarations remain **visually unverified**. Schema validation catches incomplete or contradictory declarations, not whether a palm or shoulder is actually drawn correctly. Keep independent source paths/hashes and masks in the worksheet/private project; this profile does not automatically segment or rig arms.
+
+An arm may additionally include `handPoseIntent`, either `null`/omitted (unrecorded) or an object with four nonempty text fields: `thumbSide`, `fistDirection`, `wristAndFingers`, and `phaseContext`. Describe each from this character and intended poses, including uncertainty. There are no default directions. `plan` and `transition` pass the complete intent unchanged to the drawing request; changing it invalidates the prior intake fingerprint. This is an input contract, not evidence that any resulting hand meets it. Use the per-frame review worksheet for later observations.
 
 ## Read-only localized-repair audit
 

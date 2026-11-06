@@ -46,6 +46,7 @@ def validate_contacts(c):
 
 ARM_SURFACES={'palm','dorsal','edge','occluded','source-dependent'}
 ARM_FIELDS={'physicalArmId','visibleHandSurface','mode','pose','contacts','shoulderBoundary','elbowContinuity','wristContinuity','occlusionExpectation'}
+HAND_POSE_FIELDS={'thumbSide','fistDirection','wristAndFingers','phaseContext'}
 
 def validate_arm_surface_spec(spec,contacts):
     """Validate authored intent, not arm anatomy, hand recognition, or visual quality."""
@@ -54,9 +55,13 @@ def validate_arm_surface_spec(spec,contacts):
     arms=spec['arms'];ids=set();modes=[]
     if not arms and contacts['armMode']!='none':raise ValueError('armSurfaceSpec must describe physical arms unless armMode is none')
     for arm in arms:
-        if not isinstance(arm,dict) or set(arm)!=ARM_FIELDS:raise ValueError('armSurfaceSpec arm fields are missing or unknown')
+        if not isinstance(arm,dict) or not ARM_FIELDS.issubset(arm) or set(arm)-ARM_FIELDS-{'handPoseIntent'}:raise ValueError('armSurfaceSpec arm fields are missing or unknown')
         for key in ARM_FIELDS-{'contacts'}:
             if not isinstance(arm[key],str) or not arm[key].strip():raise ValueError('armSurfaceSpec requires nonempty '+key)
+        intent=arm.get('handPoseIntent')
+        if intent is not None:
+            if not isinstance(intent,dict) or set(intent)!=HAND_POSE_FIELDS or any(not isinstance(intent[k],str) or not intent[k].strip() for k in HAND_POSE_FIELDS):
+                raise ValueError('handPoseIntent needs independent thumbSide, fistDirection, wristAndFingers and phaseContext descriptions')
         identity=arm['physicalArmId'].strip()
         if identity in ids:raise ValueError('Duplicate physicalArmId in armSurfaceSpec')
         ids.add(identity)
@@ -72,6 +77,7 @@ def arm_surface_request(row):
        'status':'unrecorded' if spec is None else 'specified-not-visually-validated',
        'requirements':['Keep each physical arm identity through occlusion; screen-near/far is not a replacement for physical identity.',
           'Visible hand surface follows the original and explicit per-arm instruction. Do not turn every hand into a palm.',
+          'When handPoseIntent is supplied, inspect surface, thumb-side facing, wrist-relative fist direction and connected wrist/fingers separately in each actual phase. A thumb-side surface is not an isolated fingertip vector; upright at one phase does not mean world-up throughout the cycle.',
           'Preserve each specified pose/contact and source sleeve or bare-shoulder boundary. Inspect shoulder, elbow and wrist continuity in actual frames.',
           'Do not fabricate hidden hand surfaces. Mark uncertainty or source-dependent surfaces for actual-source review.'],
        'automaticSemanticValidation':False}}
