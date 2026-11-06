@@ -52,3 +52,7 @@ If a side walk reads as calves dangling below a fixed waist, evaluate **motion b
 ## Explicit layered motion and production diagnostics
 
 Read [layered production](references/layered-production.md) when preserving a fixed head/torso with independent authored limbs or checking newer ownership/support-exchange failures. `layered_motion.py` uses explicit full-canvas layers and poses, bounded shoulder-root blending and optional support-only height fitting; it does not discover parts or solve grounding automatically. `production_audit.py` checks neutral alpha coverage, measured landmark timing, repeated endpoint frames and temporal record freshness. A clean diagnostic is not correct ownership, plausible anatomy or observed playback. Use the actual original, complete silhouette, all phases and normal-speed observation to decide.
+
+## Authored dash corrections
+
+Read [dash repairs](references/dash-repairs.md) for shared-head/body-axis stabilization, arm shaft length versus fist scale, shoulder-root-preserving widths, source-pinned per-view projects and clean reproduction. Use these optional corrections only when the actual new source and intended gait call for them. A matched axis, fixed head or passing checksum does not establish attractive motion; do not transfer another character's measurements or temporal acceptance.

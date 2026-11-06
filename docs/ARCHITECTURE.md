@@ -15,3 +15,6 @@ The toolkit has separate explicit-input routes. Project formats are not intercha
 Preserve a fixed canvas and constant reference scale throughout a loop. Imported source/evidence hashes make stale inputs visible, but do not establish rights, identity or correctness. Some paths use local mesh deformation, so “all pixels remain rigid” is not a valid blanket claim. Imported art and private project coordinates belong in separate production workspaces.
 
 The editor normalizes user input to a 384px canvas. The authored-cel and layered routes use their declared canvas sizes. Front/back projection helpers are manually calibrated 2D models. They cannot infer perspective from a picture or guarantee coherent visible depth without actual image review.
+
+- `dash_registration.py`: parameterized monotone body-axis registration, integer shared-layer placement, shaft/hand and row-width geometry; no image inference.
+- `dash_project.py`: source-pinned per-view authored dash registration, PNG/GIF export, diagnostics and byte-exact verification in a clean temporary directory. See `DASH_REPRODUCTION.md` for input constraints and unreviewed temporal status.

@@ -40,6 +40,17 @@ The second command exercises two original shape-based characters with different 
 
 Examples and usage for each command are available with `--help`.
 
+## Reproduce authored dash repairs
+
+`dash_registration.py` provides explicit body-axis registration, integer-only shared-head placement, shaft-length changes that preserve the hand, and shoulder-root-preserving width adjustment. `dash_project.py` pins source PNGs and reproduces a saved per-view project into real RGBA frames, GIFs and honest diagnostic reports. See [dash reproduction](docs/DASH_REPRODUCTION.md).
+
+```sh
+python dash_project.py demo output/dash-example
+python dash_project.py verify output/dash-example/project.json output/dash-example/rendered
+```
+
+The example uses original geometric shapes. Real artwork still needs authored landmarks and actual playback review; a faster walk is not automatically a dash.
+
 ## Preserve the hard-won invariants
 
 1. Keep originals immutable and one constant scale per view. Never resize every frame to its own bounding box or redraw the face to conceal registration errors.

@@ -9,3 +9,5 @@ No client/game character artwork, original uploads, project-specific registratio
 External artwork remains the responsibility of its owner. Importing an image, writing a provider request, or rendering a sprite does not confer copyright or waive provider conditions. Keep inferred hidden surfaces and source edits distinguishable from untouched original pixels. Record references and permissions in the private production workspace, not this public repository.
 
 Dependencies are not bundled; their licenses are described in `DEPENDENCIES.md`. This document describes the curated release scope, not a legal opinion or exhaustive originality guarantee.
+
+The authored dash repair helpers and their demonstration also use only parameterized algorithms and newly code-drawn shapes. No production landmark arrays, character identities, generation sheets, accepted media or upload records are included. The local cubic interpolation is an original implementation of the standard shape-preserving Hermite method, not vendored SciPy source.
