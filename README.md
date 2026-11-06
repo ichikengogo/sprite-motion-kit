@@ -65,6 +65,8 @@ See [production checks](docs/PRODUCTION_CHECKS.md) for detailed lessons and the 
 
 Use [pose-specific hand and posture review](docs/POSE_REVIEW.md) for separate surface, thumb-side, fist-direction and wrist/finger observations bound to each actual frame. Optional hand-pose intent travels through drawing requests; hash/coverage checks and authored mask/joint diagnostics never certify anatomy or playback.
 
+Use [continuity repairs](docs/CONTINUITY_REPAIRS.md) for stable frontal cores, transparent holes versus opaque repaint, long-hair backing, complete straps, foreground-hand ownership and narrow tip corrections. `python continuity_audit.py demo output/continuity-example` reproduces deliberately broken geometric cases without production assets.
+
 ## Run checks
 
 ```sh

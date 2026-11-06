@@ -95,3 +95,7 @@ Rendered PNGs retain every authored cel. GIF encoders can merge identical adjace
 Inspect source and candidate at the same fixed scale. Check each sleeve, hand, calf and shoe independently, coherent shoulder/neck joins, strap ownership, hem/hood flicker, support/recovery and visible opposition in both half-cycles. Inspect normal-color output before numeric summaries.
 
 Observe the exact candidate at normal speed and both intended sizes before describing temporal quality as reviewed. Exporting a playable GIF, decoding timestamps or examining a contact sheet is not this observation. Keep structural results, static review, actual playback review, user acceptance and engine integration as separate statuses. New exports are always `draft`, with `visualApproval: false` and `temporalReview: "UNREVIEWED"`.
+
+## Whole-component continuity after local repairs
+
+Read [continuity repairs](CONTINUITY_REPAIRS.md) for frontal head/upper-body stabilization, transparent holes versus opaque pale patches, long-hair backing, missing fists, full strap continuity and narrow tip trimming. `continuity_audit.py` provides explicit opaque-region comparisons with declared bob and foreground occlusion, plus backing-only preservation. Check the complete band rather than its buckle alone, then check foreground hand ownership independently. The synthetic demo and tests deliberately reproduce both good and broken cases. See the guide for source pinning, local edit scope, replay, and the separate static/playback gates.
